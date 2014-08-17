@@ -45,10 +45,12 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 		setContentView(R.layout.activity_paint_image);
 		
 		Intent intent = getIntent();
-
+		strFilename = intent.getStringExtra(MainActivity.FILENAME);
+		
 		//get drawing view
 		drawView = (DrawingView)findViewById(R.id.drawing);
-
+		drawView.setFilename(strFilename);		
+		
 		//get the palette and first color button
 		LinearLayout paintLayout = (LinearLayout)findViewById(R.id.paint_colors);
 		currPaint = (ImageButton)paintLayout.getChildAt(0);

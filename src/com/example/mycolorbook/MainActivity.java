@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 public class MainActivity extends ActionBarActivity {
 
+	protected static final String FILENAME = "FILENAME";
 	static final int REQUEST_CODE_FILENAME = 1;
 	TextView tvFilename;
 	private String strFilename;
@@ -52,7 +53,7 @@ public class MainActivity extends ActionBarActivity {
 	public void openPaintImageActivity(View view) {
 	    // Do something in response to button
 		Intent intent = new Intent(this, PaintImageActivity.class);
-		intent.putExtra("FILENAME", strFilename);
+		intent.putExtra(FILENAME, strFilename);
 		startActivity(intent);
 	}
 	
@@ -66,7 +67,7 @@ public class MainActivity extends ActionBarActivity {
 	            // The Intent's data Uri identifies which contact was selected.
 
 	            // Do something with the contact here (bigger example below)
-	        	strFilename=data.getStringExtra("FILENAME");
+	        	strFilename=data.getStringExtra(FILENAME);
 	        	tvFilename.setText(strFilename);
 	        }
 	    }

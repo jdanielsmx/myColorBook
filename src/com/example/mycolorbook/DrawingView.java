@@ -1,10 +1,20 @@
 package com.example.mycolorbook;
 
 
+import java.io.File;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
@@ -38,6 +48,10 @@ public class DrawingView extends View {
 	private float brushSize, lastBrushSize;
 	//erase flag
 	private boolean erase=false;
+	//image passed as canvas
+	private String strFilename;
+	//bitmap created from filename
+	private Bitmap bm;
 
 	public DrawingView(Context context, AttributeSet attrs){
 		super(context, attrs);
@@ -65,7 +79,7 @@ public class DrawingView extends View {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+		canvasBitmap = bm;//Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 		drawCanvas = new Canvas(canvasBitmap);
 	}
 
@@ -102,6 +116,49 @@ public class DrawingView extends View {
 		return true;
 
 	}
+	
+	public void setFilename(String strFile)
+	{
+		strFilename = strFile;
+		
+		File file = new File(strFilename);	   	    
+	    if(file.exists())
+	    {
+
+	    	Mat m = Highgui.imread(file.getAbsolutePath());
+	    	Mat mIntermediateMat = new Mat();
+	    	Imgproc.Canny(m, mIntermediateMat, 50, 120);
+	    	//Imgproc.cvtColor(m, m, Imgproc.COLOR_BGR2GRAY);
+	    	
+	    	
+		    Mat invertcolormatrix= new Mat(mIntermediateMat.rows(),mIntermediateMat.cols(), 
+		    		mIntermediateMat.type(), new Scalar(255,255,255));
+
+		    Core.subtract(invertcolormatrix, mIntermediateMat, mIntermediateMat);
+	    	
+	    	Mat mInv = mIntermediateMat;//getInnerWindow(mIntermediateMat);//mIntermediateMat; //invertcolormatrix;
+	    	//mInv.inv();
+	    	bm = Bitmap.createBitmap(mInv.cols(), mInv.rows(),Bitmap.Config.ARGB_8888);
+	        Utils.matToBitmap(mInv, bm);	        
+	        Matrix matrix = new Matrix();
+	        matrix.postRotate(90);
+	        Bitmap rotBM= Bitmap.createBitmap(bm , 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
+	        // create a new bitmap from the original using the matrix to transform the result
+	        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);		       
+	    }
+	}
+	
+    /*private Mat getInnerWindow(Mat myMat)
+    {                    
+        int rows = myMat.rows();
+        int cols = myMat.cols();
+        int left = cols / 8;
+        int top = rows / 8;
+        int width = cols * 3/4;
+        int height = rows * 3/4;    	    	
+    	Mat tempMat = myMat.submat(top, top + height, left, left + width);
+    	return tempMat;
+    }*/
 
 	//update color
 	public void setColor(String newColor){

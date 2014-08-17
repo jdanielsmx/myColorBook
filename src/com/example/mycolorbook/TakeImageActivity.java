@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.ListIterator;
-
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -17,17 +16,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
-
-
-
-
-
-
-/*
-import org.opencv.samples.tutorial3.R;
-import org.opencv.samples.tutorial3.Tutorial3Activity;
-import org.opencv.samples.tutorial3.Tutorial3View;
-*/
 import android.support.v7.app.ActionBarActivity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -230,20 +218,20 @@ public class TakeImageActivity extends ActionBarActivity implements CvCameraView
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String currentDateandTime = sdf.format(new Date());
         String fileName = Environment.getExternalStorageDirectory().getPath() +
-                               "/sample_picture_" + currentDateandTime + ".jpg";
-        mOpenCvCameraView.takePicture(fileName);
+                               "/myColorBook_" + currentDateandTime + ".jpg";
+        //mOpenCvCameraView.takePicture(fileName);
         
-     // Write the bitmap to external storage. 
+        //Write the bitmap to external storage. 
         
         //File path = Environment.getExternalStoragePublicDirectory( 
           //                            Environment.DIRECTORY_PICTURES); 
         //File file = new File(path, "CannyPicture_" + new 
         //SimpleDateFormat ("yyyyMMddHHmmss").format(new Date()) + ".jpg"); 
         //SaveImage(file);
-        //Highgui.imwrite(fileName,rgba);//getInnerWindow(rgba));
+        Highgui.imwrite(fileName,getInnerWindow(rgba));
         Toast.makeText(this, fileName + " saved", Toast.LENGTH_SHORT).show();
         intentFileName = new Intent();
-        intentFileName.putExtra("FILENAME", fileName);
+        intentFileName.putExtra(MainActivity.FILENAME, fileName);
         setResult(RESULT_OK,intentFileName);
         return false;
     }
