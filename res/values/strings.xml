@@ -18,4 +18,5 @@
 	<string name="sml">Small</string>
 	<string name="med">Medium</string>
 	<string name="lrg">Large</string>
+	<string name="fill">Fill</string>
 </resources>

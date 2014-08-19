@@ -120,7 +120,6 @@ public class TakeImageActivity extends ActionBarActivity implements CvCameraView
     }
     
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-		
         rgba = inputFrame.rgba();
         /*
         org.opencv.core.Size sizeRgba = rgba.size();                
@@ -228,7 +227,7 @@ public class TakeImageActivity extends ActionBarActivity implements CvCameraView
         //File file = new File(path, "CannyPicture_" + new 
         //SimpleDateFormat ("yyyyMMddHHmmss").format(new Date()) + ".jpg"); 
         //SaveImage(file);
-        Highgui.imwrite(fileName,getInnerWindow(rgba));
+        Highgui.imwrite(fileName,rgba);
         Toast.makeText(this, fileName + " saved", Toast.LENGTH_SHORT).show();
         intentFileName = new Intent();
         intentFileName.putExtra(MainActivity.FILENAME, fileName);
@@ -236,7 +235,7 @@ public class TakeImageActivity extends ActionBarActivity implements CvCameraView
         return false;
     }
     
-    private void SaveImage(File myFile)
+    /*private void SaveImage(File myFile)
     {
     	org.opencv.core.Size sizeRgba = rgba.size(); 
     	Bitmap myBitmap =Bitmap.createBitmap((int)sizeRgba.width,(int)sizeRgba.height,Bitmap.Config.ARGB_8888);
@@ -253,5 +252,5 @@ public class TakeImageActivity extends ActionBarActivity implements CvCameraView
     		Log.w(TAG, "Error writing");
     	}
     	
-    }
+    }*/
 }

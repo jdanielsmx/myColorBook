@@ -6,7 +6,9 @@ import java.io.File;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
@@ -52,6 +54,12 @@ public class DrawingView extends View {
 	private String strFilename;
 	//bitmap created from filename
 	private Bitmap bm;
+	//flag to indicate flood-fill
+	private boolean floodfill=false;
+	private Mat floodMat;
+	private Mat maskMat;
+	private Point startPoint;
+	private Scalar myScalar;
 
 	public DrawingView(Context context, AttributeSet attrs){
 		super(context, attrs);
@@ -79,15 +87,27 @@ public class DrawingView extends View {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		canvasBitmap = bm;//Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+		if (bm!= null)
+			canvasBitmap = bm;//Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+		else
+			canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 		drawCanvas = new Canvas(canvasBitmap);
 	}
 
 	//draw the view - will be called after touch event
 	@Override
 	protected void onDraw(Canvas canvas) {
-		canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
-		canvas.drawPath(drawPath, drawPaint);
+		if (!floodfill)
+		{
+			canvas.drawBitmap(canvasBitmap, 0, 0, canvasPaint);
+			canvas.drawPath(drawPath, drawPaint);
+		}
+		else
+		{						
+			
+			Imgproc.floodFill(floodMat, maskMat, startPoint, null);
+			//Imgproc.floodFill(image, mask, seedPoint, newVal, rect, loDiff, upDiff, flags);
+		}
 	}
 
 	//register user touches as drawing action
@@ -111,6 +131,15 @@ public class DrawingView extends View {
 		default:
 			return false;
 		}
+		if (floodfill)
+		{
+			floodMat = new Mat();			
+			startPoint = new Point();
+			startPoint.x=(double)touchX;
+			startPoint.y=(double)touchY;
+			Utils.bitmapToMat(canvasBitmap, floodMat);
+			maskMat = Mat.zeros(floodMat.rows()+2, floodMat.cols()+2, 255);
+		}
 		//redraw
 		invalidate();
 		return true;
@@ -125,30 +154,44 @@ public class DrawingView extends View {
 	    if(file.exists())
 	    {
 
-	    	Mat m = Highgui.imread(file.getAbsolutePath());
-	    	Mat mIntermediateMat = new Mat();
-	    	Imgproc.Canny(m, mIntermediateMat, 50, 120);
-	    	//Imgproc.cvtColor(m, m, Imgproc.COLOR_BGR2GRAY);
+	    	Mat m = Equalize(Highgui.imread(file.getAbsolutePath()));//Equalize();
+	    	Mat mCannyMat = new Mat();
+	    	Imgproc.Canny(getInnerWindow(m), mCannyMat, 80, 90);
+	    	//Mat mGray2BGRAMat = new Mat();
+	    	//Imgproc.cvtColor(mCannyMat, mGray2BGRAMat, Imgproc.COLOR_GRAY2BGRA, 4);
 	    	
+	    	//close edges
+	    	Mat mDilateMat = new Mat();
+	    	Imgproc.dilate(mCannyMat, mDilateMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1, 1)));
+	    	Mat mErodeMat = new Mat();
+	    	Imgproc.erode(mDilateMat, mErodeMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1,1)));        	    	
 	    	
-		    Mat invertcolormatrix= new Mat(mIntermediateMat.rows(),mIntermediateMat.cols(), 
-		    		mIntermediateMat.type(), new Scalar(255,255,255));
+	    	//invert the matrix to show white-background/black-edges
+		    Mat invertcolormatrix= new Mat(mErodeMat.rows(),mErodeMat.cols(), mErodeMat.type(), new Scalar(255,255,255));
+		    Core.subtract(invertcolormatrix, mErodeMat, mErodeMat);	    	
+	    	Mat mInv = mErodeMat;//mGray2BGRAMat;
 
-		    Core.subtract(invertcolormatrix, mIntermediateMat, mIntermediateMat);
-	    	
-	    	Mat mInv = mIntermediateMat;//getInnerWindow(mIntermediateMat);//mIntermediateMat; //invertcolormatrix;
-	    	//mInv.inv();
 	    	bm = Bitmap.createBitmap(mInv.cols(), mInv.rows(),Bitmap.Config.ARGB_8888);
 	        Utils.matToBitmap(mInv, bm);	        
 	        Matrix matrix = new Matrix();
 	        matrix.postRotate(90);
 	        Bitmap rotBM= Bitmap.createBitmap(bm , 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
 	        // create a new bitmap from the original using the matrix to transform the result
-	        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);		       
+	        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);	    
 	    }
 	}
 	
-    /*private Mat getInnerWindow(Mat myMat)
+	private Mat Equalize(Mat myMat)
+	{
+		Mat grayMat = new Mat();
+		Mat bwMat = new Mat();
+		Imgproc.cvtColor(myMat, grayMat, Imgproc.COLOR_RGB2GRAY);
+		Imgproc.equalizeHist(grayMat, grayMat);
+		Imgproc.threshold(grayMat, bwMat, 127.5, 255.0, Imgproc.THRESH_OTSU);
+		return bwMat;
+	}
+	
+    private Mat getInnerWindow(Mat myMat)
     {                    
         int rows = myMat.rows();
         int cols = myMat.cols();
@@ -158,7 +201,7 @@ public class DrawingView extends View {
         int height = rows * 3/4;    	    	
     	Mat tempMat = myMat.submat(top, top + height, left, left + width);
     	return tempMat;
-    }*/
+    }
 
 	//update color
 	public void setColor(String newColor){
@@ -188,6 +231,10 @@ public class DrawingView extends View {
 		erase=isErase;
 		if(erase) drawPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 		else drawPaint.setXfermode(null);
+	}
+	
+	public void setFill(boolean isFill){
+		floodfill=isFill;
 	}
 
 	//start new drawing

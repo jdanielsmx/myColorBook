@@ -34,7 +34,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 	//custom drawing view
 	private DrawingView drawView;
 	//buttons
-	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn;
+	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, fillBtn;
 	//sizes
 	private float smallBrush, mediumBrush, largeBrush;
 	private String strFilename;
@@ -80,6 +80,9 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 		saveBtn = (ImageButton)findViewById(R.id.save_btn);
 		saveBtn.setOnClickListener(this);
 		
+		//fill button
+		fillBtn = (ImageButton)findViewById(R.id.fill_btn);
+		fillBtn.setOnClickListener(this);
 		//LoadImage();
 	}
 	/*
@@ -173,6 +176,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 				@Override
 				public void onClick(View v) {
 					drawView.setErase(false);
+					drawView.setFill(false);
 					drawView.setBrushSize(smallBrush);
 					drawView.setLastBrushSize(smallBrush);
 					brushDialog.dismiss();
@@ -183,6 +187,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 				@Override
 				public void onClick(View v) {
 					drawView.setErase(false);
+					drawView.setFill(false);					
 					drawView.setBrushSize(mediumBrush);
 					drawView.setLastBrushSize(mediumBrush);
 					brushDialog.dismiss();
@@ -193,6 +198,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 				@Override
 				public void onClick(View v) {
 					drawView.setErase(false);
+					drawView.setFill(false);					
 					drawView.setBrushSize(largeBrush);
 					drawView.setLastBrushSize(largeBrush);
 					brushDialog.dismiss();
@@ -211,6 +217,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 			smallBtn.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View v) {
+					drawView.setFill(false);
 					drawView.setErase(true);
 					drawView.setBrushSize(smallBrush);
 					brushDialog.dismiss();
@@ -220,6 +227,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 			mediumBtn.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View v) {
+					drawView.setFill(false);
 					drawView.setErase(true);
 					drawView.setBrushSize(mediumBrush);
 					brushDialog.dismiss();
@@ -229,6 +237,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 			largeBtn.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View v) {
+					drawView.setFill(false);
 					drawView.setErase(true);
 					drawView.setBrushSize(largeBrush);
 					brushDialog.dismiss();
@@ -287,6 +296,12 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 				}
 			});
 			saveDialog.show();
+		}
+		else if(view.getId()==R.id.fill_btn){
+			drawView.setErase(false);
+			drawView.setFill(true);
+			drawView.setBrushSize(smallBrush);
+			drawView.setLastBrushSize(smallBrush);
 		}
 	}
 }
