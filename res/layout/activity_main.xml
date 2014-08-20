@@ -8,40 +8,33 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.mycolorbook.MainActivity" >
 
-    <TextView
-        android:id="@+id/textView1"
+    <Button
+        android:id="@+id/btnTakeImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_alignLeft="@+id/tvFilename"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="31dp"
+        android:onClick="openTakeImageActivity"
+        android:text="@string/take_image" />
 
     <Button
         android:id="@+id/btnPaintImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/btnTakeImage"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_marginLeft="16dp"
-        android:text="@string/paint_image" 
-        android:onClick="openPaintImageActivity"/>
-
-    <Button
-        android:id="@+id/btnTakeImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="128dp"
-        android:layout_marginRight="20dp"
-        android:text="@string/take_image" 
-        android:onClick="openTakeImageActivity"/>
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/btnTakeImage"
+        android:layout_marginLeft="37dp"
+        android:layout_marginTop="33dp"
+        android:onClick="openPaintImageActivity"
+        android:text="@string/paint_image" />
 
     <TextView
         android:id="@+id/tvFilename"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/btnPaintImage"
-        android:layout_below="@+id/textView1"
-        android:layout_marginTop="106dp"
+        android:layout_centerVertical="true"
         android:text="Medium Text"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 

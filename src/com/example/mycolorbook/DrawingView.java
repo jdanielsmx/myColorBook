@@ -157,28 +157,56 @@ public class DrawingView extends View {
 	    	Mat m = Equalize(Highgui.imread(file.getAbsolutePath()));//Equalize();
 	    	Mat mCannyMat = new Mat();
 	    	Imgproc.Canny(getInnerWindow(m), mCannyMat, 80, 90);
+	    	//Mat mGaussianMat = new Mat();
+	    	//Imgproc.GaussianBlur(mCannyMat, mGaussianMat, new Size(9,9), 0);
 	    	//Mat mGray2BGRAMat = new Mat();
 	    	//Imgproc.cvtColor(mCannyMat, mGray2BGRAMat, Imgproc.COLOR_GRAY2BGRA, 4);
 	    	
+	    	
 	    	//close edges
-	    	Mat mDilateMat = new Mat();
-	    	Imgproc.dilate(mCannyMat, mDilateMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1, 1)));
 	    	Mat mErodeMat = new Mat();
-	    	Imgproc.erode(mDilateMat, mErodeMat, Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(1,1)));        	    	
+	    	Mat mDilateMat = new Mat();
+	    		    	
+	    	Imgproc.dilate(mCannyMat, mDilateMat, Imgproc.getStructuringElement(Imgproc.MORPH_DILATE, new Size(5, 5)));
+	    	Imgproc.erode(mDilateMat, mErodeMat, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3,3))); 	
 	    	
 	    	//invert the matrix to show white-background/black-edges
 		    Mat invertcolormatrix= new Mat(mErodeMat.rows(),mErodeMat.cols(), mErodeMat.type(), new Scalar(255,255,255));
 		    Core.subtract(invertcolormatrix, mErodeMat, mErodeMat);	    	
 	    	Mat mInv = mErodeMat;//mGray2BGRAMat;
-
 	    	bm = Bitmap.createBitmap(mInv.cols(), mInv.rows(),Bitmap.Config.ARGB_8888);
-	        Utils.matToBitmap(mInv, bm);	        
+	        Utils.matToBitmap(mInv, bm);
+
+	    	/*
+	    	Mat mResult = ImproveImage(mGray2BGRAMat);
+	    	bm = Bitmap.createBitmap(mResult.cols(), mResult.rows(),Bitmap.Config.ARGB_8888);
+	        Utils.matToBitmap(mResult, bm);	        
+	    	*/
 	        Matrix matrix = new Matrix();
 	        matrix.postRotate(90);
 	        Bitmap rotBM= Bitmap.createBitmap(bm , 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
 	        // create a new bitmap from the original using the matrix to transform the result
 	        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);	    
 	    }
+	}
+	
+	private Mat ImproveImage(Mat mInput)
+	{
+		Mat mIntermediateMat = new Mat();
+		// 1) Apply gaussian blur to remove noise
+		Imgproc.GaussianBlur(mInput, mIntermediateMat, new Size(11,11), 0);
+
+		// 2) AdaptiveThreshold -> classify as either black or white
+		Imgproc.adaptiveThreshold(mIntermediateMat, mIntermediateMat, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 5, 2);
+
+		// 3) Invert the image -> so most of the image is black
+		Core.bitwise_not(mIntermediateMat, mIntermediateMat);
+
+		// 4) Dilate -> fill the image using the MORPH_DILATE
+		Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_DILATE, new Size(3,3), new Point(1,1));
+		Imgproc.dilate(mIntermediateMat, mIntermediateMat, kernel);
+		
+		return mIntermediateMat;
 	}
 	
 	private Mat Equalize(Mat myMat)
