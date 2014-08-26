@@ -19,4 +19,6 @@
 	<string name="med">Medium</string>
 	<string name="lrg">Large</string>
 	<string name="fill">Fill</string>
+	<string name="up">up</string>
+	<string name="down">down</string>
 </resources>

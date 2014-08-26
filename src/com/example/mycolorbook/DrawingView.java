@@ -60,9 +60,22 @@ public class DrawingView extends View {
 	private Mat maskMat;
 	private Point startPoint;
 	private Scalar myScalar;
+	
+	private int gaussianSize;
+	private int thSize;
+	private int thConstant;
+	private int dilateSize;
+	private int erodeSize;
+	private PaintImageActivity.imageParameters myParameter;
+	private File myfile;
 
 	public DrawingView(Context context, AttributeSet attrs){
 		super(context, attrs);
+		gaussianSize=3;
+		thSize=31;
+		thConstant=4;
+		dilateSize=25;
+		erodeSize=3;
 		setupDrawing();
 	}
 
@@ -82,13 +95,27 @@ public class DrawingView extends View {
 		drawPaint.setStrokeCap(Paint.Cap.ROUND);
 		canvasPaint = new Paint(Paint.DITHER_FLAG);
 	}
+	
+	public void SetParameterValue (PaintImageActivity.imageParameters myParameter, int myValue)
+	{
+		if (myParameter == PaintImageActivity.imageParameters.GaussianSize)
+			gaussianSize += myValue;
+		if (myParameter == PaintImageActivity.imageParameters.ThresholdSize)
+			thSize += myValue;
+		if (myParameter == PaintImageActivity.imageParameters.ThresholdConstant)
+			thConstant += myValue;
+		if (myParameter == PaintImageActivity.imageParameters.DilateSize)
+			dilateSize += myValue;
+		if (myParameter == PaintImageActivity.imageParameters.ErodeSize)
+			erodeSize += myValue;					
+	}
 
 	//size assigned to view
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
 		if (bm!= null)
-			canvasBitmap = bm;//Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+			canvasBitmap = bm;
 		else
 			canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 		drawCanvas = new Canvas(canvasBitmap);
@@ -150,11 +177,62 @@ public class DrawingView extends View {
 	{
 		strFilename = strFile;
 		
+		myfile = new File(strFilename);	   	    
+	    if(myfile.exists())
+	    {
+	    	DrawCanny();
+	    }
+	}
+	
+	public void DrawCanny()
+	{
+    	Mat m = Highgui.imread(myfile.getAbsolutePath());   	
+    	Mat mGaussianMat = new Mat();
+    	Imgproc.GaussianBlur(m, mGaussianMat, new Size(gaussianSize,gaussianSize), 0);
+    	Mat mgrayMat = new Mat();
+    	Imgproc.cvtColor(mGaussianMat, mgrayMat, Imgproc.COLOR_RGB2GRAY);
+    	Mat mAdaptativeTH = new Mat();
+    	//Imgproc.ADAPTIVE_THRESH_MEAN_C
+    	Imgproc.adaptiveThreshold(mgrayMat, mAdaptativeTH, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 
+    			Imgproc.THRESH_BINARY_INV, thSize, thConstant);		    	
+    	Mat mDilateMat = new Mat();	    		    	
+    	Imgproc.dilate(CreateNegativeMat(mAdaptativeTH), mDilateMat, 
+    			Imgproc.getStructuringElement(Imgproc.MORPH_DILATE, new Size(dilateSize, dilateSize)));
+    	Mat mErodeMat = new Mat();
+    	Imgproc.erode(mDilateMat, mErodeMat, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(erodeSize,erodeSize)));
+    	Mat mCannyMat = new Mat();
+    	Imgproc.Canny(getInnerWindow(mErodeMat), mCannyMat, 80, 90);	    		    	
+    	CreateCanvasBitmap(CreateNegativeMat(mCannyMat));
+	}
+	
+	private Mat CreateNegativeMat(Mat myMat)
+	{
+	    Mat invertcolormatrix= new Mat(myMat.rows(),myMat.cols(), myMat.type(), new Scalar(255,255,255));
+	    Mat mNegative = new Mat();
+	    Core.subtract(invertcolormatrix, myMat, mNegative);
+	    return mNegative;
+	}
+	
+	private void CreateCanvasBitmap(Mat mImage)
+	{
+    	bm = Bitmap.createBitmap(mImage.cols(), mImage.rows(),Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mImage, bm);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap rotBM = Bitmap.createBitmap(bm , 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
+        // create a new bitmap from the original using the matrix to transform the result
+        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);	
+	}
+	
+	public void setFilenameX(String strFile)
+	{
+		strFilename = strFile;
+		
 		File file = new File(strFilename);	   	    
 	    if(file.exists())
 	    {
 
-	    	Mat m = Equalize(Highgui.imread(file.getAbsolutePath()));//Equalize();
+	    	Mat m = Equalize(Highgui.imread(file.getAbsolutePath()));
 	    	Mat mCannyMat = new Mat();
 	    	Imgproc.Canny(getInnerWindow(m), mCannyMat, 80, 90);
 	    	//Mat mGaussianMat = new Mat();
@@ -162,11 +240,9 @@ public class DrawingView extends View {
 	    	//Mat mGray2BGRAMat = new Mat();
 	    	//Imgproc.cvtColor(mCannyMat, mGray2BGRAMat, Imgproc.COLOR_GRAY2BGRA, 4);
 	    	
-	    	
 	    	//close edges
 	    	Mat mErodeMat = new Mat();
-	    	Mat mDilateMat = new Mat();
-	    		    	
+	    	Mat mDilateMat = new Mat();	    		    	
 	    	Imgproc.dilate(mCannyMat, mDilateMat, Imgproc.getStructuringElement(Imgproc.MORPH_DILATE, new Size(5, 5)));
 	    	Imgproc.erode(mDilateMat, mErodeMat, Imgproc.getStructuringElement(Imgproc.MORPH_CROSS, new Size(3,3))); 	
 	    	
@@ -188,7 +264,7 @@ public class DrawingView extends View {
 	        // create a new bitmap from the original using the matrix to transform the result
 	        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);	    
 	    }
-	}
+	}	
 	
 	private Mat ImproveImage(Mat mInput)
 	{

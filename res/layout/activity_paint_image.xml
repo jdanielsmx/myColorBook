@@ -13,6 +13,13 @@
 		android:layout_height="50dp"
 		android:layout_gravity="center"
 		android:orientation="horizontal" >
+		
+		<ImageButton
+			android:id="@+id/up_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:contentDescription="@string/up"
+			android:src="@drawable/up_arrow" />		    
 
 		<ImageButton
 			android:id="@+id/new_btn"
@@ -47,7 +54,14 @@
 			android:layout_width="wrap_content"
 			android:layout_height="fill_parent"
 			android:contentDescription="@string/fill"
-			android:src="@drawable/paintbucket" />		
+			android:src="@drawable/paintbucket" />
+		
+		<ImageButton
+			android:id="@+id/down_btn"
+			android:layout_width="wrap_content"
+			android:layout_height="fill_parent"
+			android:contentDescription="@string/down"
+			android:src="@drawable/br_down" />			
 	</LinearLayout>
 
 	<!-- Custom View -->

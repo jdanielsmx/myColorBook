@@ -39,6 +39,10 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 	private float smallBrush, mediumBrush, largeBrush;
 	private String strFilename;
 	
+	public enum imageParameters {GaussianSize, ThresholdSize, ThresholdConstant, DilateSize, ErodeSize }
+	
+	private imageParameters myParameter;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -83,6 +87,8 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 		//fill button
 		fillBtn = (ImageButton)findViewById(R.id.fill_btn);
 		fillBtn.setOnClickListener(this);
+		
+		myParameter = imageParameters.GaussianSize;
 		//LoadImage();
 	}
 	/*
@@ -123,9 +129,20 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 	    }
 	}
 */
+	
+	//private int gaussianSize;
+	//private int thSize;
+	//private int thConstant;
+	//private int dilateSize;
+	//private int erodeSize;
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.addSubMenu("Color Effect");
+		menu.add(0,1,1,"Gaussian size");
+		menu.add(0,2,2,"Threshold size");
+		menu.add(0,3,3,"Threshold constant");
+		menu.add(0,4,4,"Dilate size");
+		menu.add(0,5,5,"Erode size");
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.paint_image, menu);
 		return true;
@@ -137,6 +154,17 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
+		if (id == 1)
+			myParameter = imageParameters.GaussianSize;
+		else if (id == 2)
+			myParameter = imageParameters.ThresholdSize;
+		else if (id == 3)
+			myParameter = imageParameters.ThresholdConstant;
+		else if (id == 4)
+			myParameter = imageParameters.DilateSize;
+		else if (id == 5)
+			myParameter = imageParameters.ErodeSize;
+			
 		if (id == R.id.action_settings) {
 			return true;
 		}
@@ -302,6 +330,17 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 			drawView.setFill(true);
 			drawView.setBrushSize(smallBrush);
 			drawView.setLastBrushSize(smallBrush);
+		}
+		else if(view.getId()==R.id.up_btn)
+		{
+			drawView.SetParameterValue(myParameter, 1);
+			drawView.DrawCanny();
+			//add call to repaint
+		}
+		else if(view.getId()==R.id.down_btn)
+		{
+			drawView.SetParameterValue(myParameter, -1);
+			drawView.DrawCanny();
 		}
 	}
 }
