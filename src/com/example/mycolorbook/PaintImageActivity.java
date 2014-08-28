@@ -34,7 +34,7 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 	//custom drawing view
 	private DrawingView drawView;
 	//buttons
-	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, fillBtn;
+	private ImageButton currPaint, drawBtn, eraseBtn, newBtn, saveBtn, fillBtn, upBtn, downBtn;
 	//sizes
 	private float smallBrush, mediumBrush, largeBrush;
 	private String strFilename;
@@ -87,6 +87,14 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 		//fill button
 		fillBtn = (ImageButton)findViewById(R.id.fill_btn);
 		fillBtn.setOnClickListener(this);
+		
+		//down button
+		downBtn = (ImageButton)findViewById(R.id.down_btn);
+		downBtn.setOnClickListener(this);
+		
+		//up button
+		upBtn = (ImageButton)findViewById(R.id.up_btn);
+		upBtn.setOnClickListener(this);		
 		
 		myParameter = imageParameters.GaussianSize;
 		//LoadImage();
@@ -333,14 +341,15 @@ public class PaintImageActivity extends ActionBarActivity implements OnClickList
 		}
 		else if(view.getId()==R.id.up_btn)
 		{
-			drawView.SetParameterValue(myParameter, 1);
+			drawView.SetParameterValue(myParameter, 2);
 			drawView.DrawCanny();
-			//add call to repaint
+			drawView.postInvalidate();
 		}
 		else if(view.getId()==R.id.down_btn)
 		{
-			drawView.SetParameterValue(myParameter, -1);
+			drawView.SetParameterValue(myParameter, -2);
 			drawView.DrawCanny();
+			drawView.postInvalidate();
 		}
 	}
 }

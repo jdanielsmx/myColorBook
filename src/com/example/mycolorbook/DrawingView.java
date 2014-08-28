@@ -66,16 +66,23 @@ public class DrawingView extends View {
 	private int thConstant;
 	private int dilateSize;
 	private int erodeSize;
+	
+	final int gaussianSizeC=3;
+	final int thSizeC=15;
+	final int thConstantC=4;
+	final int dilateSizeC=5;
+	final int erodeSizeC=3;
+	
 	private PaintImageActivity.imageParameters myParameter;
 	private File myfile;
 
 	public DrawingView(Context context, AttributeSet attrs){
 		super(context, attrs);
-		gaussianSize=3;
-		thSize=31;
-		thConstant=4;
-		dilateSize=25;
-		erodeSize=3;
+		gaussianSize = gaussianSizeC;
+		thSize = thSizeC;
+		thConstant = thConstantC;
+		dilateSize = dilateSizeC;
+		erodeSize = erodeSizeC;
 		setupDrawing();
 	}
 
@@ -99,15 +106,30 @@ public class DrawingView extends View {
 	public void SetParameterValue (PaintImageActivity.imageParameters myParameter, int myValue)
 	{
 		if (myParameter == PaintImageActivity.imageParameters.GaussianSize)
+		{
 			gaussianSize += myValue;
+			if (gaussianSize <= 0) gaussianSize = gaussianSizeC;
+		}
 		if (myParameter == PaintImageActivity.imageParameters.ThresholdSize)
+		{
 			thSize += myValue;
+		if (thSize <= 0) thSize = thSizeC;
+		}
 		if (myParameter == PaintImageActivity.imageParameters.ThresholdConstant)
+		{
 			thConstant += myValue;
+			if (thConstant <= 0) thConstant = thConstantC;
+		}
 		if (myParameter == PaintImageActivity.imageParameters.DilateSize)
+		{
 			dilateSize += myValue;
+			if (dilateSize <= 0) dilateSize = dilateSizeC;
+		}
 		if (myParameter == PaintImageActivity.imageParameters.ErodeSize)
-			erodeSize += myValue;					
+		{
+			erodeSize += myValue;
+			if (erodeSize <= 0) erodeSize = erodeSizeC;
+		}
 	}
 
 	//size assigned to view
@@ -221,7 +243,8 @@ public class DrawingView extends View {
         matrix.postRotate(90);
         Bitmap rotBM = Bitmap.createBitmap(bm , 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
         // create a new bitmap from the original using the matrix to transform the result
-        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);	
+        bm = Bitmap.createScaledBitmap(rotBM, 1050, 1185, false);
+        canvasBitmap = bm;
 	}
 	
 	public void setFilenameX(String strFile)
